@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface PRHOnOffButtonAppDelegate : NSObject <NSApplicationDelegate> {
+@interface PRHOnOffButtonAppDelegate : NSObject {
     NSWindow *window;
 	NSCellStateValue onState, offState, mixedState;
 }
