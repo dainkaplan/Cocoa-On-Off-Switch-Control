@@ -8,21 +8,19 @@
 
 #import "PRHOnOffButtonCell.h"
 
-//In this file, the “button” is the part that slides between the two extremes of the frame.
-
-#define BUTTON_WIDTH_FRACTION 0.45f
-#define BUTTON_CORNER_RADIUS 3.0f
+#define THUMB_WIDTH_FRACTION 0.45f
+#define THUMB_CORNER_RADIUS 3.0f
 #define FRAME_CORNER_RADIUS 5.0f
 
-#define BUTTON_GRADIENT_MAX_Y_WHITE 1.0f
-#define BUTTON_GRADIENT_MIN_Y_WHITE 0.9f
+#define THUMB_GRADIENT_MAX_Y_WHITE 1.0f
+#define THUMB_GRADIENT_MIN_Y_WHITE 0.9f
 #define BACKGROUND_GRADIENT_MAX_Y_WHITE 0.50f
 #define BACKGROUND_GRADIENT_MIN_Y_WHITE 0.75f
 #define BORDER_WHITE 0.1f
 
-#define BUTTON_SHADOW_WHITE 0.0f
-#define BUTTON_SHADOW_ALPHA 0.5f
-#define BUTTON_SHADOW_BLUR 3.0f
+#define THUMB_SHADOW_WHITE 0.0f
+#define THUMB_SHADOW_ALPHA 0.5f
+#define THUMB_SHADOW_BLUR 3.0f
 
 #define ONE_THIRD  (1.0 / 3.0)
 #define ONE_HALF   (1.0 / 2.0)
@@ -58,14 +56,14 @@
 	return self;
 }
 
-- (NSRect) buttonRectInFrame:(NSRect)cellFrame {
+- (NSRect) thumbRectInFrame:(NSRect)cellFrame {
 	cellFrame.size.width -= 2.0f;
 	cellFrame.size.height -= 2.0f;
 	cellFrame.origin.x += 1.0f;
 	cellFrame.origin.y += 1.0f;
 
-	NSRect buttonFrame = cellFrame;
-	buttonFrame.size.width *= BUTTON_WIDTH_FRACTION;
+	NSRect thumbFrame = cellFrame;
+	thumbFrame.size.width *= THUMB_WIDTH_FRACTION;
 
 	NSCellStateValue state = [self state];
 	switch (state) {
@@ -74,15 +72,15 @@
 			break;
 		case NSOnState:
 			//Far right.
-			buttonFrame.origin.x += (cellFrame.size.width - buttonFrame.size.width);
+			thumbFrame.origin.x += (cellFrame.size.width - thumbFrame.size.width);
 			break;
 		case NSMixedState:
 			//Middle.
-			buttonFrame.origin.x = (cellFrame.size.width / 2.0f) - (buttonFrame.size.width / 2.0f);
+			thumbFrame.origin.x = (cellFrame.size.width / 2.0f) - (thumbFrame.size.width / 2.0f);
 			break;
 	}
 
-	return buttonFrame;
+	return thumbFrame;
 }
 
 - (void) drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
@@ -102,8 +100,8 @@
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	//Draw the button (sliding bit).
-	NSRect buttonFrame = [self buttonRectInFrame:cellFrame];
+	//Draw the thumb.
+	NSRect thumbFrame = [self thumbRectInFrame:cellFrame];
 
 	NSGraphicsContext *context = [NSGraphicsContext currentContext];
 	[context saveGraphicsState];
@@ -112,43 +110,43 @@
 	cellFrame.size.height -= 2.0f;
 	cellFrame.origin.x += 1.0f;
 	cellFrame.origin.y += 1.0f;
-	NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:BUTTON_CORNER_RADIUS yRadius:BUTTON_CORNER_RADIUS];
+	NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:THUMB_CORNER_RADIUS yRadius:THUMB_CORNER_RADIUS];
 	[clipPath addClip];
 
 	if (tracking) {
-		buttonFrame.origin.x += trackingPoint.x - initialTrackingPoint.x;
+		thumbFrame.origin.x += trackingPoint.x - initialTrackingPoint.x;
 
 		//Clamp.
 		CGFloat minOrigin = cellFrame.origin.x;
-		CGFloat maxOrigin = cellFrame.origin.x + (cellFrame.size.width - buttonFrame.size.width);
-		if (buttonFrame.origin.x < minOrigin)
-			buttonFrame.origin.x = minOrigin;
-		else if (buttonFrame.origin.x > maxOrigin)
-			buttonFrame.origin.x = maxOrigin;
+		CGFloat maxOrigin = cellFrame.origin.x + (cellFrame.size.width - thumbFrame.size.width);
+		if (thumbFrame.origin.x < minOrigin)
+			thumbFrame.origin.x = minOrigin;
+		else if (thumbFrame.origin.x > maxOrigin)
+			thumbFrame.origin.x = maxOrigin;
 
-		trackingButtonCenterX = NSMidX(buttonFrame);
+		trackingThumbCenterX = NSMidX(thumbFrame);
 	}
 
-	NSBezierPath *buttonPath = [NSBezierPath bezierPathWithRoundedRect:buttonFrame xRadius:BUTTON_CORNER_RADIUS yRadius:BUTTON_CORNER_RADIUS];
-	NSShadow *buttonShadow = [[[NSShadow alloc] init] autorelease];
-	[buttonShadow setShadowColor:[NSColor colorWithCalibratedWhite:BUTTON_SHADOW_WHITE alpha:BUTTON_SHADOW_ALPHA]];
-	[buttonShadow setShadowBlurRadius:BUTTON_SHADOW_BLUR];
-	[buttonShadow setShadowOffset:NSZeroSize];
-	[buttonShadow set];
+	NSBezierPath *thumbPath = [NSBezierPath bezierPathWithRoundedRect:thumbFrame xRadius:THUMB_CORNER_RADIUS yRadius:THUMB_CORNER_RADIUS];
+	NSShadow *thumbShadow = [[[NSShadow alloc] init] autorelease];
+	[thumbShadow setShadowColor:[NSColor colorWithCalibratedWhite:THUMB_SHADOW_WHITE alpha:THUMB_SHADOW_ALPHA]];
+	[thumbShadow setShadowBlurRadius:THUMB_SHADOW_BLUR];
+	[thumbShadow setShadowOffset:NSZeroSize];
+	[thumbShadow set];
 	[[NSColor whiteColor] setFill];
 	if ([self showsFirstResponder] && ([self focusRingType] != NSFocusRingTypeNone))
 		NSSetFocusRingStyle(NSFocusRingBelow);
-	[buttonPath fill];
-	NSGradient *buttonGradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BUTTON_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BUTTON_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
-	[buttonGradient drawInBezierPath:buttonPath angle:90.0f];
+	[thumbPath fill];
+	NSGradient *thumbGradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:THUMB_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:THUMB_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
+	[thumbGradient drawInBezierPath:thumbPath angle:90.0f];
 
 	[context restoreGraphicsState];
 
 	if (tracking && (getenv("PRHOnOffButtonCellDebug") != NULL)) {
-		NSBezierPath *buttonCenterLine = [NSBezierPath bezierPath];
-		[buttonCenterLine moveToPoint:(NSPoint){ NSMidX(buttonFrame), buttonFrame.origin.y +buttonFrame.size.height * ONE_THIRD }];
-		[buttonCenterLine lineToPoint:(NSPoint){ NSMidX(buttonFrame), buttonFrame.origin.y +buttonFrame.size.height * TWO_THIRDS }];
-		[buttonCenterLine stroke];
+		NSBezierPath *thumbCenterLine = [NSBezierPath bezierPath];
+		[thumbCenterLine moveToPoint:(NSPoint){ NSMidX(thumbFrame), thumbFrame.origin.y +thumbFrame.size.height * ONE_THIRD }];
+		[thumbCenterLine lineToPoint:(NSPoint){ NSMidX(thumbFrame), thumbFrame.origin.y +thumbFrame.size.height * TWO_THIRDS }];
+		[thumbCenterLine stroke];
 
 		NSBezierPath *sectionLines = [NSBezierPath bezierPath];
 		if ([self allowsMixedState]) {
@@ -190,7 +188,7 @@
 
 	NSControl *control = [controlView isKindOfClass:[NSControl class]] ? (NSControl *)controlView : nil;
 	if (control) {
-		CGFloat xFraction = trackingButtonCenterX / trackingCellFrame.size.width;
+		CGFloat xFraction = trackingThumbCenterX / trackingCellFrame.size.width;
 
 		NSCellStateValue desiredState;
 
