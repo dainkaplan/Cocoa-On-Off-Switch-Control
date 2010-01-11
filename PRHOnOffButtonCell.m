@@ -58,7 +58,7 @@
 			break;
 		case NSOnState:
 			//Far right.
-			buttonFrame.origin.x = (cellFrame.size.width - buttonFrame.size.width) + 1.0f;
+			buttonFrame.origin.x += (cellFrame.size.width - buttonFrame.size.width);
 			break;
 		case NSMixedState:
 			//Middle.
