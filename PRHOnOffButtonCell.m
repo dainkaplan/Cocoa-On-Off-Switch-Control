@@ -65,6 +65,10 @@
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	//Draw the button (sliding bit).
+
+	NSGraphicsContext *context = [NSGraphicsContext currentContext];
+	[context saveGraphicsState];
+
 	cellFrame.size.width -= 2.0f;
 	cellFrame.size.height -= 2.0f;
 	cellFrame.origin.x += 1.0f;
@@ -102,6 +106,8 @@
 	[buttonPath fill];
 	NSGradient *buttonGradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BUTTON_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BUTTON_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
 	[buttonGradient drawInBezierPath:buttonPath angle:90.0f];
+
+	[context restoreGraphicsState];
 }
 
 - (NSUInteger)hitTestForEvent:(NSEvent *)event inRect:(NSRect)cellFrame ofView:(NSView *)controlView {
