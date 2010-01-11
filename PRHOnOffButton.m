@@ -42,6 +42,7 @@
 					break;
 				case NSMixedState:
 					[self setState:NSOffState];
+					break;
 				case NSOnState:
 					if ([self allowsMixedState])
 						[self setState:NSMixedState];
@@ -60,6 +61,7 @@
 					break;
 				case NSMixedState:
 					[self setState:NSOnState];
+					break;
 				case NSOnState:
 					NSBeep();
 					break;
