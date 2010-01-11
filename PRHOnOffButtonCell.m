@@ -26,10 +26,34 @@
 
 @implementation PRHOnOffButtonCell
 
++ (NSFocusRingType) defaultFocusRingType {
+	return NSFocusRingTypeExterior;
+}
+
+- (id) initImageCell:(NSImage *)image {
+	if ((self = [super initImageCell:image])) {
+		[self setFocusRingType:[[self class] defaultFocusRingType]];
+	}
+	return self;
+}
+- (id) initTextCell:(NSString *)str {
+	if ((self = [super initTextCell:str])) {
+		[self setFocusRingType:[[self class] defaultFocusRingType]];
+	}
+	return self;
+}
+//HAX: IB (I guess?) sets our focus ring type to None for some reason. Nobody asks defaultFocusRingType unless we do it.
+- (id) initWithCoder:(NSCoder *)decoder {
+	if ((self = [super initWithCoder:decoder])) {
+		[self setFocusRingType:[[self class] defaultFocusRingType]];
+	}
+	return self;
+}
+
 - (void) drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	//Draw the background, then the frame.
 	NSBezierPath *borderPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS];
-
+	
 	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5f alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:0.75f alpha:1.0f]] autorelease];
 	[background drawInBezierPath:borderPath angle:90.0f];
 
@@ -73,6 +97,8 @@
 	[buttonShadow setShadowOffset:NSZeroSize];
 	[buttonShadow set];
 	[[NSColor whiteColor] setFill];
+	if ([self showsFirstResponder] && ([self focusRingType] != NSFocusRingTypeNone))
+		NSSetFocusRingStyle(NSFocusRingBelow);
 	[buttonPath fill];
 	NSGradient *buttonGradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BUTTON_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BUTTON_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
 	[buttonGradient drawInBezierPath:buttonPath angle:90.0f];
