@@ -26,6 +26,9 @@
 #define ONE_HALF   (1.0 / 2.0)
 #define TWO_THIRDS (2.0 / 3.0)
 
+#define DISABLED_OVERLAY_GRAY  1.0f
+#define DISABLED_OVERLAY_ALPHA TWO_THIRDS
+
 @implementation PRHOnOffButtonCell
 
 + (BOOL) prefersTrackingUntilMouseUp {
@@ -87,6 +90,10 @@
 	if (tracking)
 		trackingCellFrame = cellFrame;
 
+	NSGraphicsContext *context = [NSGraphicsContext currentContext];
+	CGContextRef quartzContext = [context graphicsPort];
+	CGContextBeginTransparencyLayer(quartzContext, /*auxInfo*/ NULL);
+
 	//Draw the background, then the frame.
 	NSBezierPath *borderPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS];
 	
@@ -97,6 +104,18 @@
 	[borderPath stroke];
 
 	[self drawInteriorWithFrame:cellFrame inView:controlView];
+
+	if (![self isEnabled]) {
+		CGColorRef color = CGColorCreateGenericGray(DISABLED_OVERLAY_GRAY, DISABLED_OVERLAY_ALPHA);
+		if (color) {
+			CGContextSetBlendMode(quartzContext, kCGBlendModeLighten);
+			CGContextSetFillColorWithColor(quartzContext, color);
+			CGContextFillRect(quartzContext, cellFrame);
+
+			CFRelease(color);
+		}
+	}
+	CGContextEndTransparencyLayer(quartzContext);
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
