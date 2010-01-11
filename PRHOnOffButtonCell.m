@@ -50,31 +50,11 @@
 	return self;
 }
 
-- (void) drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	//Draw the background, then the frame.
-	NSBezierPath *borderPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS];
-	
-	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5f alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:0.75f alpha:1.0f]] autorelease];
-	[background drawInBezierPath:borderPath angle:90.0f];
-
-	[[NSColor colorWithCalibratedWhite:BORDER_WHITE alpha:1.0f] setStroke];
-	[borderPath stroke];
-
-	[self drawInteriorWithFrame:cellFrame inView:controlView];
-}
-
-- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
-	//Draw the button (sliding bit).
-
-	NSGraphicsContext *context = [NSGraphicsContext currentContext];
-	[context saveGraphicsState];
-
+- (NSRect) buttonRectInFrame:(NSRect)cellFrame {
 	cellFrame.size.width -= 2.0f;
 	cellFrame.size.height -= 2.0f;
 	cellFrame.origin.x += 1.0f;
 	cellFrame.origin.y += 1.0f;
-	NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:BUTTON_CORNER_RADIUS yRadius:BUTTON_CORNER_RADIUS];
-	[clipPath addClip];
 
 	NSRect buttonFrame = cellFrame;
 	buttonFrame.size.width *= BUTTON_WIDTH_FRACTION;
@@ -93,6 +73,36 @@
 			buttonFrame.origin.x = (cellFrame.size.width / 2.0f) - (buttonFrame.size.width / 2.0f);
 			break;
 	}
+
+	return buttonFrame;
+}
+
+- (void) drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+	//Draw the background, then the frame.
+	NSBezierPath *borderPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS];
+	
+	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5f alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:0.75f alpha:1.0f]] autorelease];
+	[background drawInBezierPath:borderPath angle:90.0f];
+
+	[[NSColor colorWithCalibratedWhite:BORDER_WHITE alpha:1.0f] setStroke];
+	[borderPath stroke];
+
+	[self drawInteriorWithFrame:cellFrame inView:controlView];
+}
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+	//Draw the button (sliding bit).
+	NSRect buttonFrame = [self buttonRectInFrame:cellFrame];
+
+	NSGraphicsContext *context = [NSGraphicsContext currentContext];
+	[context saveGraphicsState];
+
+	cellFrame.size.width -= 2.0f;
+	cellFrame.size.height -= 2.0f;
+	cellFrame.origin.x += 1.0f;
+	cellFrame.origin.y += 1.0f;
+	NSBezierPath *clipPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:BUTTON_CORNER_RADIUS yRadius:BUTTON_CORNER_RADIUS];
+	[clipPath addClip];
 
 	NSBezierPath *buttonPath = [NSBezierPath bezierPathWithRoundedRect:buttonFrame xRadius:BUTTON_CORNER_RADIUS yRadius:BUTTON_CORNER_RADIUS];
 	NSShadow *buttonShadow = [[[NSShadow alloc] init] autorelease];
