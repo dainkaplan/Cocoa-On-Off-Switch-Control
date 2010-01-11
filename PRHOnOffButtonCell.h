@@ -9,7 +9,10 @@
 #import <Cocoa/Cocoa.h>
 
 @interface PRHOnOffButtonCell : NSButtonCell {
-
+	BOOL tracking;
+	NSPoint initialTrackingPoint, trackingPoint;
+	NSRect trackingCellFrame; //Set by drawWithFrame: when tracking is true.
+	CGFloat trackingButtonCenterX; //Set by drawWithFrame: when tracking is true.
 }
 
 @end
