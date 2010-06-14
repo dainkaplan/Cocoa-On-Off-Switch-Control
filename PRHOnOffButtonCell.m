@@ -31,6 +31,8 @@
 #define DISABLED_OVERLAY_GRAY  1.0f
 #define DISABLED_OVERLAY_ALPHA TWO_THIRDS
 
+#define DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(view) ([view isFlipped] ? 90.0f : 270.0f)
+
 struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	EventTime clickTimeout;
 	HISize clickMaxDistance;
@@ -119,7 +121,7 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	[borderPath stroke];
 
 	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
-	[background drawInBezierPath:borderPath angle:90.0f];
+	[background drawInBezierPath:borderPath angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
 
 	[self drawInteriorWithFrame:cellFrame inView:controlView];
 
@@ -175,7 +177,7 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 		NSSetFocusRingStyle(NSFocusRingBelow);
 	[thumbPath fill];
 	NSGradient *thumbGradient = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:THUMB_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:THUMB_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
-	[thumbGradient drawInBezierPath:thumbPath angle:90.0f];
+	[thumbGradient drawInBezierPath:thumbPath angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
 
 	[context restoreGraphicsState];
 
