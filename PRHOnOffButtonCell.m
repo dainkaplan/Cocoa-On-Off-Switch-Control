@@ -10,6 +10,10 @@
 
 #include <Carbon/Carbon.h>
 
+#define ONE_THIRD  (1.0 / 3.0)
+#define ONE_HALF   (1.0 / 2.0)
+#define TWO_THIRDS (2.0 / 3.0)
+
 #define THUMB_WIDTH_FRACTION 0.45f
 #define THUMB_CORNER_RADIUS 2.0f
 #define FRAME_CORNER_RADIUS 2.0f
@@ -23,10 +27,6 @@
 #define THUMB_SHADOW_WHITE 0.0f
 #define THUMB_SHADOW_ALPHA 0.5f
 #define THUMB_SHADOW_BLUR 3.0f
-
-#define ONE_THIRD  (1.0 / 3.0)
-#define ONE_HALF   (1.0 / 2.0)
-#define TWO_THIRDS (2.0 / 3.0)
 
 #define DISABLED_OVERLAY_GRAY  1.0f
 #define DISABLED_OVERLAY_ALPHA TWO_THIRDS
