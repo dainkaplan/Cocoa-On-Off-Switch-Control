@@ -118,7 +118,7 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	[[NSColor colorWithCalibratedWhite:BORDER_WHITE alpha:1.0f] setStroke];
 	[borderPath stroke];
 
-	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5f alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:0.75f alpha:1.0f]] autorelease];
+	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
 	[background drawInBezierPath:borderPath angle:90.0f];
 
 	[self drawInteriorWithFrame:cellFrame inView:controlView];
