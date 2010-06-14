@@ -8,6 +8,8 @@
 
 #import "PRHOnOffButtonCell.h"
 
+#include <Carbon/Carbon.h>
+
 #define THUMB_WIDTH_FRACTION 0.45f
 #define THUMB_CORNER_RADIUS 3.0f
 #define FRAME_CORNER_RADIUS 5.0f
@@ -29,6 +31,11 @@
 #define DISABLED_OVERLAY_GRAY  1.0f
 #define DISABLED_OVERLAY_ALPHA TWO_THIRDS
 
+struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
+	EventTime clickTimeout;
+	HISize clickMaxDistance;
+};
+
 @implementation PRHOnOffButtonCell
 
 + (BOOL) prefersTrackingUntilMouseUp {
@@ -39,22 +46,33 @@
 	return NSFocusRingTypeExterior;
 }
 
+- (void) furtherInit {
+	[self setFocusRingType:[[self class] defaultFocusRingType]];
+	stuff = NSZoneMalloc([self zone], sizeof(struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor));
+	OSStatus err = HIMouseTrackingGetParameters(kMouseParamsSticky, &(stuff->clickTimeout), &(stuff->clickMaxDistance));
+	if (err != noErr) {
+		//Values returned by the above function call as of 10.6.3.
+		stuff->clickTimeout = ONE_THIRD * kEventDurationSecond;
+		stuff->clickMaxDistance = (HISize){ 6.0f, 6.0f };
+	}
+}
+
 - (id) initImageCell:(NSImage *)image {
 	if ((self = [super initImageCell:image])) {
-		[self setFocusRingType:[[self class] defaultFocusRingType]];
+		[self furtherInit];
 	}
 	return self;
 }
 - (id) initTextCell:(NSString *)str {
 	if ((self = [super initTextCell:str])) {
-		[self setFocusRingType:[[self class] defaultFocusRingType]];
+		[self furtherInit];
 	}
 	return self;
 }
-//HAX: IB (I guess?) sets our focus ring type to None for some reason. Nobody asks defaultFocusRingType unless we do it.
+//HAX: IB (I guess?) sets our focus ring type to None for some reason. Nobody asks defaultFocusRingType unless we do it (in furtherInit).
 - (id) initWithCoder:(NSCoder *)decoder {
 	if ((self = [super initWithCoder:decoder])) {
-		[self setFocusRingType:[[self class] defaultFocusRingType]];
+		[self furtherInit];
 	}
 	return self;
 }
@@ -190,12 +208,14 @@
 	//We rely on NSControl behavior, so only start tracking if this is a control.
 	tracking = YES;
 	trackingPoint = initialTrackingPoint = startPoint;
+	trackingTime = initialTrackingTime = [NSDate timeIntervalSinceReferenceDate];
 	return [controlView isKindOfClass:[NSControl class]];
 }
 - (BOOL) continueTracking:(NSPoint)lastPoint at:(NSPoint)currentPoint inView:(NSView *)controlView {
 	NSControl *control = [controlView isKindOfClass:[NSControl class]] ? (NSControl *)controlView : nil;
 	if (control) {
 		trackingPoint = currentPoint;
+		//No need to update the time here as long as nothing cares about it.
 		[control drawCell:self];
 		return YES;
 	}
@@ -204,45 +224,53 @@
 }
 - (void)stopTracking:(NSPoint)lastPoint at:(NSPoint)stopPoint inView:(NSView *)controlView mouseIsUp:(BOOL)flag {
 	tracking = NO;
+	trackingTime = [NSDate timeIntervalSinceReferenceDate];
 
 	NSControl *control = [controlView isKindOfClass:[NSControl class]] ? (NSControl *)controlView : nil;
 	if (control) {
 		CGFloat xFraction = trackingThumbCenterX / trackingCellFrame.size.width;
 
-		NSCellStateValue desiredState;
+		BOOL isClickNotDragByTime = (trackingTime - initialTrackingTime) < stuff->clickTimeout;
+		BOOL isClickNotDragBySpaceX = (stopPoint.x - initialTrackingPoint.x) < stuff->clickMaxDistance.width;
+		BOOL isClickNotDragBySpaceY = (stopPoint.y - initialTrackingPoint.y) < stuff->clickMaxDistance.height;
+		BOOL isClickNotDrag = isClickNotDragByTime && isClickNotDragBySpaceX && isClickNotDragBySpaceY;
 
-		if ([self allowsMixedState]) {
-			if (xFraction < ONE_THIRD)
-				desiredState = NSOffState;
-			else if (xFraction >= TWO_THIRDS)
-				desiredState = NSOnState;
-			else
-				desiredState = NSMixedState;
-		} else {
-			if (xFraction < ONE_HALF)
-				desiredState = NSOffState;
-			else
-				desiredState = NSOnState;
-		}
+		if (!isClickNotDrag) {
+			NSCellStateValue desiredState;
 
-		//We actually need to set the state to the one *before* the one we want, because NSCell will advance it. I'm not sure how to thwart that without breaking -setNextState, which breaks AXPress and the space bar.
-		NSCellStateValue stateBeforeDesiredState;
-		switch (desiredState) {
-			case NSOnState:
-				if ([self allowsMixedState]) {
-					stateBeforeDesiredState = NSMixedState;
+			if ([self allowsMixedState]) {
+				if (xFraction < ONE_THIRD)
+					desiredState = NSOffState;
+				else if (xFraction >= TWO_THIRDS)
+					desiredState = NSOnState;
+				else
+					desiredState = NSMixedState;
+			} else {
+				if (xFraction < ONE_HALF)
+					desiredState = NSOffState;
+				else
+					desiredState = NSOnState;
+			}
+
+			//We actually need to set the state to the one *before* the one we want, because NSCell will advance it. I'm not sure how to thwart that without breaking -setNextState, which breaks AXPress and the space bar.
+			NSCellStateValue stateBeforeDesiredState;
+			switch (desiredState) {
+				case NSOnState:
+					if ([self allowsMixedState]) {
+						stateBeforeDesiredState = NSMixedState;
+						break;
+					}
+					//Fall through.
+				case NSMixedState:
+					stateBeforeDesiredState = NSOffState;
 					break;
-				}
-				//Fall through.
-			case NSMixedState:
-				stateBeforeDesiredState = NSOffState;
-				break;
-			case NSOffState:
-				stateBeforeDesiredState = NSOnState;
-				break;
-		}
+				case NSOffState:
+					stateBeforeDesiredState = NSOnState;
+					break;
+			}
 
-		[self setState:stateBeforeDesiredState];
+			[self setState:stateBeforeDesiredState];
+		}
 	}
 }
 

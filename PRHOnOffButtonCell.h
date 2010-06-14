@@ -11,8 +11,11 @@
 @interface PRHOnOffButtonCell : NSButtonCell {
 	BOOL tracking;
 	NSPoint initialTrackingPoint, trackingPoint;
+	NSTimeInterval initialTrackingTime, trackingTime;
 	NSRect trackingCellFrame; //Set by drawWithFrame: when tracking is true.
 	CGFloat trackingThumbCenterX; //Set by drawWithFrame: when tracking is true.
+
+	struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor *stuff;
 }
 
 @end
