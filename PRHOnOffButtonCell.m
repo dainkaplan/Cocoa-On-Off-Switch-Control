@@ -11,14 +11,14 @@
 #include <Carbon/Carbon.h>
 
 #define THUMB_WIDTH_FRACTION 0.45f
-#define THUMB_CORNER_RADIUS 3.0f
-#define FRAME_CORNER_RADIUS 5.0f
+#define THUMB_CORNER_RADIUS 2.0f
+#define FRAME_CORNER_RADIUS 2.0f
 
 #define THUMB_GRADIENT_MAX_Y_WHITE 1.0f
 #define THUMB_GRADIENT_MIN_Y_WHITE 0.9f
 #define BACKGROUND_GRADIENT_MAX_Y_WHITE 0.50f
 #define BACKGROUND_GRADIENT_MIN_Y_WHITE 0.75f
-#define BORDER_WHITE 0.1f
+#define BORDER_WHITE 0.125f
 
 #define THUMB_SHADOW_WHITE 0.0f
 #define THUMB_SHADOW_ALPHA 0.5f
@@ -113,13 +113,13 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	CGContextBeginTransparencyLayer(quartzContext, /*auxInfo*/ NULL);
 
 	//Draw the background, then the frame.
-	NSBezierPath *borderPath = [NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS];
-	
-	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5f alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:0.75f alpha:1.0f]] autorelease];
-	[background drawInBezierPath:borderPath angle:90.0f];
+	NSBezierPath *borderPath = [NSBezierPath bezierPathWithRoundedRect:NSInsetRect(cellFrame, 1.0f, 1.0f) xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS];
 
 	[[NSColor colorWithCalibratedWhite:BORDER_WHITE alpha:1.0f] setStroke];
 	[borderPath stroke];
+
+	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:0.5f alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:0.75f alpha:1.0f]] autorelease];
+	[background drawInBezierPath:borderPath angle:90.0f];
 
 	[self drawInteriorWithFrame:cellFrame inView:controlView];
 
