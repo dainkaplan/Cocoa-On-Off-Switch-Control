@@ -15,13 +15,17 @@
 #define TWO_THIRDS (2.0 / 3.0)
 
 #define THUMB_WIDTH_FRACTION 0.45f
-#define THUMB_CORNER_RADIUS 2.0f
-#define FRAME_CORNER_RADIUS 2.0f
+#define THUMB_CORNER_RADIUS 2.5f
+#define FRAME_CORNER_RADIUS 2.5f
 
 #define THUMB_GRADIENT_MAX_Y_WHITE 1.0f
 #define THUMB_GRADIENT_MIN_Y_WHITE 0.9f
-#define BACKGROUND_GRADIENT_MAX_Y_WHITE 0.50f
-#define BACKGROUND_GRADIENT_MIN_Y_WHITE 0.75f
+#define BACKGROUND_GRADIENT_MAX_Y_WHITE 0.5f
+#define BACKGROUND_GRADIENT_MIN_Y_WHITE TWO_THIRDS
+#define BACKGROUND_SHADOW_GRADIENT_WHITE 0.0f
+#define BACKGROUND_SHADOW_GRADIENT_MAX_Y_ALPHA 0.35f
+#define BACKGROUND_SHADOW_GRADIENT_MIN_Y_ALPHA 0.0f
+#define BACKGROUND_SHADOW_GRADIENT_HEIGHT 4.0f
 #define BORDER_WHITE 0.125f
 
 #define THUMB_SHADOW_WHITE 0.0f
@@ -122,6 +126,19 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 
 	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
 	[background drawInBezierPath:borderPath angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
+
+	[context saveGraphicsState];
+
+	[[NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS] addClip];
+
+	NSGradient *backgroundShadow = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_SHADOW_GRADIENT_WHITE alpha:BACKGROUND_SHADOW_GRADIENT_MAX_Y_ALPHA] endingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_SHADOW_GRADIENT_WHITE alpha:BACKGROUND_SHADOW_GRADIENT_MIN_Y_ALPHA]] autorelease];
+	NSRect backgroundShadowRect = cellFrame;
+	if (![controlView isFlipped])
+		backgroundShadowRect.origin.y += backgroundShadowRect.size.height - BACKGROUND_SHADOW_GRADIENT_HEIGHT;
+	backgroundShadowRect.size.height = BACKGROUND_SHADOW_GRADIENT_HEIGHT;
+	[backgroundShadow drawInRect:backgroundShadowRect angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
+
+	[context restoreGraphicsState];
 
 	[self drawInteriorWithFrame:cellFrame inView:controlView];
 
