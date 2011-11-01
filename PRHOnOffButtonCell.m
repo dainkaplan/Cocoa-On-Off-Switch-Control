@@ -147,7 +147,7 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 		if (color) {
 			CGContextSetBlendMode(quartzContext, kCGBlendModeLighten);
 			CGContextSetFillColorWithColor(quartzContext, color);
-			CGContextFillRect(quartzContext, cellFrame);
+			CGContextFillRect(quartzContext, NSRectToCGRect(cellFrame));
 
 			CFRelease(color);
 		}
