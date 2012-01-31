@@ -1,22 +1,24 @@
 //
-//  PRHOnOffButton.m
-//  PRHOnOffButton
+//  OnOffSwitchControl.m
+//  OnOffSwitchControl
 //
 //  Created by Peter Hosey on 2010-01-10.
 //  Copyright 2010 Peter Hosey. All rights reserved.
 //
+//  Extended by Dain Kaplan on 2012-01-31.
+//  Copyright 2012 Dain Kaplan. All rights reserved.
+//
 
-#import "PRHOnOffButton.h"
+#import "OnOffSwitchControl.h"
+#import "OnOffSwitchControlCell.h"
 
-#import "PRHOnOffButtonCell.h"
-
-@implementation PRHOnOffButton
+@implementation OnOffSwitchControl
 
 + (void) initialize {
-	[self setCellClass:[PRHOnOffButtonCell class]];
+	[self setCellClass:[OnOffSwitchControlCell class]];
 }
 - (void) awakeFromNib {
-	[[self class] setCellClass:[PRHOnOffButtonCell class]];
+	[[self class] setCellClass:[OnOffSwitchControlCell class]];
 }
 
 - (void) keyDown:(NSEvent *)event {

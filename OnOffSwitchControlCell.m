@@ -5,10 +5,17 @@
 //  Created by Peter Hosey on 2010-01-10.
 //  Copyright 2010 Peter Hosey. All rights reserved.
 //
+//  Extended by Dain Kaplan on 2012-01-31.
+//  Copyright 2012 Dain Kaplan. All rights reserved.
+//
 
-#import "PRHOnOffButtonCell.h"
+#import "OnOffSwitchControlCell.h"
 
 #include <Carbon/Carbon.h>
+
+// NOTE(dk): New defines for changing appearance
+#define USE_COLORED_GRADIENTS true
+#define SHOW_ONOFF_LABELS true
 
 #define ONE_THIRD  (1.0 / 3.0)
 #define ONE_HALF   (1.0 / 2.0)
@@ -42,7 +49,37 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	HISize clickMaxDistance;
 };
 
-@implementation PRHOnOffButtonCell
+@interface  OnOffSwitchControlCell() 
+
+@property (readwrite, assign) NSColor *customOnColor;
+@property (readwrite, assign) NSColor *customOffColor;
+
+- (CGFloat)centerXForThumbWithFrame:(NSRect)cellFrame;
+- (void)drawText:(NSString *)text withFrame:(NSRect)textFrame;
+- (void)tintBackgroundWithFrame:(NSRect)cellFrame inView:(NSView *)controlView;
+@end
+
+// NOTE(dk): start additions
+
+// NOTE(dk): Mostly taken from: http://cocoaheads.org/peg-narrative/basic-drawing.html
+NSRect DKCenterRect(NSRect smallRect, NSRect bigRect)
+{
+    NSRect centerRect;
+    centerRect.size = smallRect.size;
+    centerRect.origin.x = bigRect.origin.x + (bigRect.size.width - smallRect.size.width) / 2.0;
+    centerRect.origin.y = bigRect.origin.y + (bigRect.size.height - smallRect.size.height) / 2.0;
+    return (centerRect);
+}
+// NOTE(dk): end additions
+
+@implementation OnOffSwitchControlCell
+
+@synthesize showsOnOffLabels;
+@synthesize onOffSwitchControlColors;
+@synthesize customOffColor;
+@synthesize customOnColor;
+@synthesize onSwitchLabel;
+@synthesize offSwitchLabel;
 
 + (BOOL) prefersTrackingUntilMouseUp {
 	return /*YES, YES, a thousand times*/ YES;
@@ -61,6 +98,12 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 		stuff->clickTimeout = ONE_THIRD * kEventDurationSecond;
 		stuff->clickMaxDistance = (HISize){ 6.0f, 6.0f };
 	}
+	// NOTE(dk): start additions 
+	self.showsOnOffLabels = YES;
+	self.onOffSwitchControlColors = OnOffSwitchControlBlueGreyColors;
+	self.onSwitchLabel = @"ON";
+	self.offSwitchLabel = @"OFF";
+	// NOTE(dk): end additions
 }
 
 - (id) initImageCell:(NSImage *)image {
@@ -110,6 +153,122 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	return thumbFrame;
 }
 
+// NOTE(dk): start additions
+
+- (void) setOnOffSwitchCustomOnColor:(NSColor *)onColor offColor:(NSColor *)offColor
+{
+	self.customOffColor = offColor;
+	self.customOnColor = onColor;
+}
+
+// NOTE(dk): Split this out so we can call it elsewhere.
+- (CGFloat)centerXForThumbWithFrame:(NSRect)cellFrame
+{
+	NSRect thumbFrame = [self thumbRectInFrame:cellFrame];
+	if (tracking) {
+		thumbFrame.origin.x += trackingPoint.x - initialTrackingPoint.x;
+		
+		//Clamp.
+		CGFloat minOrigin = cellFrame.origin.x;
+		CGFloat maxOrigin = cellFrame.origin.x + (cellFrame.size.width - thumbFrame.size.width);
+		if (thumbFrame.origin.x < minOrigin)
+			thumbFrame.origin.x = minOrigin;
+		else if (thumbFrame.origin.x > maxOrigin)
+			thumbFrame.origin.x = maxOrigin;
+	}
+	return NSMidX(thumbFrame);
+}
+
+// NOTE(dk): Center the text (as able) in the provided frame and draw it.
+- (void)drawText:(NSString *)text withFrame:(NSRect)textFrame {
+	CGFloat fontSize = [NSFont systemFontSizeForControlSize:[self controlSize]];
+	//[NSFont fontWithName: @"HelveticaNeue-Bold" size:fontSize];
+	NSFont *sysFont = [NSFont boldSystemFontOfSize:fontSize];
+	NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+								sysFont, NSFontAttributeName, 
+								[NSColor whiteColor], NSForegroundColorAttributeName, nil];
+	NSSize textSize = [text sizeWithAttributes:attributes];
+	NSRect textBounds = DKCenterRect(NSMakeRect(0, 0, textSize.width, textSize.height), textFrame);
+	[text drawInRect: textBounds withAttributes:attributes];
+}
+
+// Applies tints to the background to show the on/off state.
+- (void)tintBackgroundWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
+	
+	NSGraphicsContext *context = [NSGraphicsContext currentContext];
+	[context saveGraphicsState];
+	[[NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS] addClip];
+	
+	// NOTE(dk): Make everything to the left of the thumb one color, and to the right another.
+	NSRect thumbFrame = [self thumbRectInFrame:cellFrame];
+	CGFloat thumbCenterX = [self centerXForThumbWithFrame:cellFrame];
+	NSRect leftFrame;
+	NSRect rightFrame;
+	CGFloat offsetWidth = thumbCenterX;
+	NSDivideRect(cellFrame, &leftFrame, &rightFrame, offsetWidth - cellFrame.origin.x, NSMinXEdge);
+	//NSLog(@"OffsetWidth is: %f / %f; left: %f; right: %f", offsetWidth, cellFrame.origin.x, leftFrame.size.width, rightFrame.size.width);
+	
+	NSColor *onStartColor;
+	NSColor *onEndColor;
+	NSColor *offStartColor;
+	NSColor *offEndColor;
+
+	NSColor *_blueColor = [NSColor colorWithCalibratedRed:0.0 green:0.3 blue:1.0 alpha:0.6f];
+	NSColor *_greyColor = [NSColor colorWithCalibratedRed:1.0 green:0.0 blue:0.0 alpha:0.0f];
+	NSColor *_greenColor = [NSColor colorWithCalibratedRed:0.0 green:0.7 blue:0.0 alpha:0.6f];
+	NSColor *_redColor = [NSColor colorWithCalibratedRed:0.7 green:0.0 blue:0.0 alpha:0.6f];
+		
+	switch (self.onOffSwitchControlColors) {
+		case OnOffSwitchControlBlueGreyColors:
+			onStartColor = onEndColor = _blueColor;
+			offStartColor = offEndColor = _greyColor;
+			break;
+		case OnOffSwitchControlRedGreenColors:
+			onStartColor = onEndColor = _greenColor;
+			offStartColor = offEndColor = _redColor;
+			break;
+		case OnOffSwitchControlCustomColors:
+			onStartColor = onEndColor = self.customOnColor;
+			offStartColor = offEndColor = self.customOffColor;
+			break;
+		case OnOffSwitchControlDefaultColors:
+		default:
+			onStartColor = onEndColor = nil;
+			offStartColor = offEndColor = nil;
+	}
+	
+	if (onStartColor != nil && offStartColor != nil) {
+		NSGradient *leftBackground = [[NSGradient alloc] initWithStartingColor:onStartColor 
+																	endingColor:onEndColor];
+		NSGradient *rightBackground = [[NSGradient alloc] initWithStartingColor:offStartColor 
+																	 endingColor:offEndColor];
+		[leftBackground drawInRect:NSInsetRect(leftFrame, 1.0f, 1.0f) angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
+		[rightBackground drawInRect:NSInsetRect(rightFrame, 1.0f, 1.0f) angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
+		[leftBackground release];
+		[rightBackground release];
+	}
+	[context restoreGraphicsState];
+	
+	if (self.showsOnOffLabels) {
+		// Left label
+		NSRect leftSizeFrame;
+		leftSizeFrame.origin.x = (tracking ? thumbCenterX-(thumbFrame.size.width/2) : thumbFrame.origin.x) - cellFrame.size.width * TWO_THIRDS + 2;
+		leftSizeFrame.origin.y = cellFrame.origin.y;
+		leftSizeFrame.size.width = cellFrame.size.width * TWO_THIRDS + 2;
+		leftSizeFrame.size.height = cellFrame.size.height;
+		[self drawText:self.onSwitchLabel withFrame:leftSizeFrame];
+		
+		// Right label
+		NSRect rightSizeFrame;
+		rightSizeFrame.origin.x = (tracking ? thumbCenterX+(thumbFrame.size.width/2) : thumbFrame.origin.x + thumbFrame.size.width) - 2;
+		rightSizeFrame.origin.y = cellFrame.origin.y;
+		rightSizeFrame.size.width = cellFrame.size.width * TWO_THIRDS - 2;
+		rightSizeFrame.size.height = cellFrame.size.height;
+		[self drawText:self.offSwitchLabel withFrame:rightSizeFrame];
+	}
+}
+// NOTE(dk): end additions
+
 - (void) drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	if (tracking)
 		trackingCellFrame = cellFrame;
@@ -123,14 +282,22 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 
 	[[NSColor colorWithCalibratedWhite:BORDER_WHITE alpha:1.0f] setStroke];
 	[borderPath stroke];
-
-	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MAX_Y_WHITE alpha:1.0f] endingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MIN_Y_WHITE alpha:1.0f]] autorelease];
+	
+	NSColor *startColor = [NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MAX_Y_WHITE alpha:1.0f];
+	NSColor *endColor = [NSColor colorWithCalibratedWhite:BACKGROUND_GRADIENT_MIN_Y_WHITE alpha:1.0f];
+	NSGradient *background = [[[NSGradient alloc] initWithStartingColor:startColor endingColor:endColor] autorelease];
 	[background drawInBezierPath:borderPath angle:DOWNWARD_ANGLE_IN_DEGREES_FOR_VIEW(controlView)];
 
 	[context saveGraphicsState];
-
+	
 	[[NSBezierPath bezierPathWithRoundedRect:cellFrame xRadius:FRAME_CORNER_RADIUS yRadius:FRAME_CORNER_RADIUS] addClip];
-
+	
+	// NOTE(dk): start additions
+	if (USE_COLORED_GRADIENTS && ![self allowsMixedState]) {
+		[self tintBackgroundWithFrame:cellFrame inView:controlView];
+	}
+	// NOTE(dk): end additions
+	
 	NSGradient *backgroundShadow = [[[NSGradient alloc] initWithStartingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_SHADOW_GRADIENT_WHITE alpha:BACKGROUND_SHADOW_GRADIENT_MAX_Y_ALPHA] endingColor:[NSColor colorWithCalibratedWhite:BACKGROUND_SHADOW_GRADIENT_WHITE alpha:BACKGROUND_SHADOW_GRADIENT_MIN_Y_ALPHA]] autorelease];
 	NSRect backgroundShadowRect = cellFrame;
 	if (![controlView isFlipped])
@@ -155,10 +322,11 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	CGContextEndTransparencyLayer(quartzContext);
 }
 
+
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView {
 	//Draw the thumb.
 	NSRect thumbFrame = [self thumbRectInFrame:cellFrame];
-
+	
 	NSGraphicsContext *context = [NSGraphicsContext currentContext];
 	[context saveGraphicsState];
 
@@ -180,7 +348,7 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 		else if (thumbFrame.origin.x > maxOrigin)
 			thumbFrame.origin.x = maxOrigin;
 
-		trackingThumbCenterX = NSMidX(thumbFrame);
+		trackingThumbCenterX = [self centerXForThumbWithFrame:cellFrame];
 	}
 
 	NSBezierPath *thumbPath = [NSBezierPath bezierPathWithRoundedRect:thumbFrame xRadius:THUMB_CORNER_RADIUS yRadius:THUMB_CORNER_RADIUS];
@@ -235,6 +403,7 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 	if (control) {
 		trackingPoint = currentPoint;
 		//No need to update the time here as long as nothing cares about it.
+		trackingTime = initialTrackingTime = [NSDate timeIntervalSinceReferenceDate];
 		[control drawCell:self];
 		return YES;
 	}
