@@ -1,5 +1,7 @@
 # Cocoa On/Off Switch Control
 
+![Screenshot](wiki/screenshot1.png)
+
 ## About
 
 This is a fork of the original PRHOnOffButton project by Peter Hosey (boredzo). That project was awesome, but I wanted to make the switches more iOS-like, with different colors for the on/off states, as well as labels for each state. 
