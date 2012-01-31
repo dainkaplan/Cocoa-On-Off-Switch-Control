@@ -29,7 +29,7 @@
 	[self.customColorsSwitch setOnOffSwitchCustomOnColor:[NSColor magentaColor] offColor:[NSColor orangeColor]];
 	[self.customColorsSwitch setOnSwitchLabel:@"YES"];
 	[self.customColorsSwitch setOffSwitchLabel:@"NO"];
-	[self.redGreenColorsSwitch setOnOffSwitchControlColors:OnOffSwitchControlRedGreenColors];
+	[self.redGreenColorsSwitch setOnOffSwitchControlColors:OnOffSwitchControlGreenRedColors];
 }
 
 @synthesize window;
