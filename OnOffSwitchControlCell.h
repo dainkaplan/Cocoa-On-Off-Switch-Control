@@ -14,7 +14,7 @@
 typedef enum {
 	OnOffSwitchControlDefaultColors = 0,
 	OnOffSwitchControlBlueGreyColors = 1,
-	OnOffSwitchControlRedGreenColors = 2,
+	OnOffSwitchControlGreenRedColors = 2,
 	OnOffSwitchControlCustomColors = 3
 } OnOffSwitchControlColors;
 
