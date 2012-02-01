@@ -51,8 +51,8 @@ struct PRHOOBCStuffYouWouldNeedToIncludeCarbonHeadersFor {
 
 @interface  OnOffSwitchControlCell() 
 
-@property (readwrite, assign) NSColor *customOnColor;
-@property (readwrite, assign) NSColor *customOffColor;
+@property (readwrite, retain) NSColor *customOnColor;
+@property (readwrite, retain) NSColor *customOffColor;
 
 - (CGFloat)centerXForThumbWithFrame:(NSRect)cellFrame;
 - (void)drawText:(NSString *)text withFrame:(NSRect)textFrame;
