@@ -17,14 +17,16 @@ You can create iOS-like switch toggles for your cocoa apps on OS X. There are a 
     // from OnOffSwitchControlCell.h
 	typedef enum {
 		OnOffSwitchControlDefaultColors = 0,
-		OnOffSwitchControlBlueGreyColors = 1,
-		OnOffSwitchControlGreenRedColors = 2,
-		OnOffSwitchControlCustomColors = 3
+		OnOffSwitchControlCustomColors = 1,
+		OnOffSwitchControlBlueGreyColors = 2,
+		OnOffSwitchControlGreenRedColors = 3,
+		OnOffSwitchControlBlueRedColors = 4,
 	} OnOffSwitchControlColors;
     
 * `OnOffSwitchControlDefaultColors`: No colors for on/off states (other than the default *grey* control color).
 * `OnOffSwitchControlBlueGreyColors`: Blue on state and grey off state (like in iOS).
 * `OnOffSwitchControlGreenRedColors`: Red off state and green on state.
+* `OnOffSwitchControlBlueRedColors`: Red off state and blue on state.
 * `OnOffSwitchControlCustomColors`: Allows you to specify custom colors for the two states.
 
 You set this flag by:
