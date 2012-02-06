@@ -30,8 +30,10 @@
 	[self.customColorsSwitch setOnSwitchLabel:@"YES"];
 	[self.customColorsSwitch setOffSwitchLabel:@"NO"];
 	[self.redGreenColorsSwitch setOnOffSwitchControlColors:OnOffSwitchControlGreenRedColors];
+	[self.featureToggleSwitch setOnOffSwitchControlColors:OnOffSwitchControlBlueRedColors];
 }
 
+@synthesize featureToggleSwitch;
 @synthesize window;
 @synthesize onState, offState, mixedState;
 @synthesize customColorsSwitch;

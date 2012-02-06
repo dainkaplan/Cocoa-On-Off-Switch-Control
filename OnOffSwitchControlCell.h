@@ -13,9 +13,10 @@
 
 typedef enum {
 	OnOffSwitchControlDefaultColors = 0,
-	OnOffSwitchControlBlueGreyColors = 1,
-	OnOffSwitchControlGreenRedColors = 2,
-	OnOffSwitchControlCustomColors = 3
+	OnOffSwitchControlCustomColors = 1,
+	OnOffSwitchControlBlueGreyColors = 2,
+	OnOffSwitchControlGreenRedColors = 3,
+	OnOffSwitchControlBlueRedColors = 4
 } OnOffSwitchControlColors;
 
 NSRect DKCenterRect(NSRect smallRect, NSRect bigRect);

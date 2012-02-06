@@ -227,6 +227,10 @@ NSRect DKCenterRect(NSRect smallRect, NSRect bigRect)
 			onStartColor = onEndColor = _greenColor;
 			offStartColor = offEndColor = _redColor;
 			break;
+		case OnOffSwitchControlBlueRedColors:
+			onStartColor = onEndColor = _blueColor;
+			offStartColor = offEndColor = _redColor;
+			break;
 		case OnOffSwitchControlCustomColors:
 			onStartColor = onEndColor = self.customOnColor;
 			offStartColor = offEndColor = self.customOffColor;

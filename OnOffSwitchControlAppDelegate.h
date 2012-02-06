@@ -17,7 +17,9 @@
 	NSCellStateValue onState, offState, mixedState;
 	OnOffSwitchControlCell *customColorsSwitch;
 	OnOffSwitchControlCell *redGreenColorsSwitch;
+	OnOffSwitchControlCell *featureToggleSwitch;
 }
+@property (assign) IBOutlet OnOffSwitchControlCell *featureToggleSwitch;
 
 @property (assign) IBOutlet NSWindow *window;
 @property NSCellStateValue onState, offState, mixedState;
