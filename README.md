@@ -10,6 +10,11 @@ This is a fork of the original PRHOnOffButton project by Peter Hosey (boredzo). 
 
 Eventually I'll make the switches also stylable, so they can be round like in iOS 5+.
 
+## Hg/Git Repositories
+
+[Hg repository is available on bitbucket](https://bitbucket.org/dainkaplan/cocoa-on-off-switch-control).
+[Git mirror of this repository exists on github](https://github.com/dainkaplan/Cocoa-On-Off-Switch-Control).
+
 ## Usage
 
 You can create iOS-like switch toggles for your cocoa apps on OS X. There are a few built in settings for changing the appearance:
