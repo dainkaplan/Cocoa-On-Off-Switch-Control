@@ -169,8 +169,8 @@ NSRect DKCenterRect(NSRect smallRect, NSRect bigRect)
 		thumbFrame.origin.x += trackingPoint.x - initialTrackingPoint.x;
 		
 		//Clamp.
-		CGFloat minOrigin = cellFrame.origin.x;
-		CGFloat maxOrigin = cellFrame.origin.x + (cellFrame.size.width - thumbFrame.size.width);
+		CGFloat minOrigin = cellFrame.origin.x + 1;
+		CGFloat maxOrigin = cellFrame.origin.x + (cellFrame.size.width - thumbFrame.size.width - 1);
 		if (thumbFrame.origin.x < minOrigin)
 			thumbFrame.origin.x = minOrigin;
 		else if (thumbFrame.origin.x > maxOrigin)
@@ -256,18 +256,16 @@ NSRect DKCenterRect(NSRect smallRect, NSRect bigRect)
 	if (self.showsOnOffLabels) {
 		// Left label
 		NSRect leftSizeFrame;
-		leftSizeFrame.origin.x = (tracking ? thumbCenterX-(thumbFrame.size.width/2) : thumbFrame.origin.x) - cellFrame.size.width * TWO_THIRDS + 2;
+		leftSizeFrame.origin.x = (tracking ? thumbCenterX-(thumbFrame.size.width/2) : thumbFrame.origin.x) - (cellFrame.size.width - thumbFrame.size.width) + 2;
 		leftSizeFrame.origin.y = cellFrame.origin.y;
-		leftSizeFrame.size.width = cellFrame.size.width * TWO_THIRDS + 2;
+		leftSizeFrame.size.width = cellFrame.size.width - thumbFrame.size.width - 2;
 		leftSizeFrame.size.height = cellFrame.size.height;
 		[self drawText:self.onSwitchLabel withFrame:leftSizeFrame];
 		
 		// Right label
-		NSRect rightSizeFrame;
-		rightSizeFrame.origin.x = (tracking ? thumbCenterX+(thumbFrame.size.width/2) : thumbFrame.origin.x + thumbFrame.size.width) - 2;
+		NSRect rightSizeFrame = leftSizeFrame;
+		rightSizeFrame.origin.x = (tracking ? thumbCenterX+(thumbFrame.size.width/2): thumbFrame.origin.x + thumbFrame.size.width) + 1;
 		rightSizeFrame.origin.y = cellFrame.origin.y;
-		rightSizeFrame.size.width = cellFrame.size.width * TWO_THIRDS - 2;
-		rightSizeFrame.size.height = cellFrame.size.height;
 		[self drawText:self.offSwitchLabel withFrame:rightSizeFrame];
 	}
 }
