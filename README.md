@@ -1,6 +1,6 @@
 # Cocoa On/Off Switch Control
 
-![Screenshot](wiki/screenshot1.png)
+![Screenshot](https://bitbucket.org/dainkaplan/cocoa-on-off-switch-control/wiki/screenshot1.png)
 
 ## About
 
