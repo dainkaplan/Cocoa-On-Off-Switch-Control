@@ -13,4 +13,5 @@ Pod::Spec.new do |s|
   s.platform     = :osx
   s.source_files = 'OnOffSwitchControl.{h,m}', 'OnOffSwitchControlCell.{h,m}'
   s.public_header_files = 'OnOffSwitchControl.h', 'OnOffSwitchControlCell.h'
+  s.frameworks = 'Carbon'
 end
